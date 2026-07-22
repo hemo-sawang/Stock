@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/style.css" />
   <link rel="stylesheet" href="style.css" />
   <title>HemoStock | บริหาร Stock ไตเทียม</title>
 </head>
@@ -22,33 +23,33 @@
         <span><strong>HemoStock</strong><small>ระบบบริหาร Stock ไตเทียม</small></span>
       </a>
       <nav class="main-nav" aria-label="เมนูหลัก">
-        <button class="nav-link active" data-page="dashboard">▦ แดชบอร์ด</button>
-        <button class="nav-link" data-page="stockin">↓ รับเข้า</button>
-        <button class="nav-link" data-page="stockout">↑ จ่ายออก</button>
-        <button class="nav-link" data-page="reports">▤ รายงานสรุป</button>
+        <button class="nav-link active" data-page="dashboard"><i class="ph-bold ph-layout"></i> แดชบอร์ด</button>
+        <button class="nav-link" data-page="stockin"><i class="ph-bold ph-box-arrow-down"></i> รับเข้า</button>
+        <button class="nav-link" data-page="stockout"><i class="ph-bold ph-box-arrow-up-right"></i> จ่ายออก</button>
+        <button class="nav-link" data-page="reports"><i class="ph-bold ph-chart-pie-slice"></i> รายงานสรุป</button>
       </nav>
-      <button id="installBtn" class="install-btn" hidden>⇩ ติดตั้งแอป</button>
+      <button id="installBtn" class="install-btn" hidden><i class="ph-bold ph-cloud-arrow-down"></i> ติดตั้งแอป</button>
     </header>
 
     <main>
       <section id="dashboard" class="page active">
         <div class="hero-row"><div><p class="eyebrow">INVENTORY OVERVIEW</p><h1>ภาพรวมคลังเวชภัณฑ์</h1><p class="muted">ติดตามสถานะคงคลังและวันหมดอายุแบบเรียลไทม์</p></div><div class="date-chip" id="today"></div></div>
         <section class="quick-actions" aria-label="เมนูลัด">
-          <button data-go="stockin"><i>＋</i><span>รับเข้า<small>บันทึกรายการใหม่</small></span></button>
-          <button data-go="stockout"><i>↗</i><span>จ่ายออก<small>ตัดจ่ายจากคลัง</small></span></button>
-          <button id="printHistory"><i>⌑</i><span>พิมพ์ย้อนหลัง<small>ลาเบลและ QR Code</small></span></button>
-          <button data-go="reports"><i>▤</i><span>รายงานสรุป<small>ข้อมูลเพื่อการบริหาร</small></span></button>
+          <button data-go="stockin"><i class="ph-bold ph-box-arrow-down"></i><span>รับเข้า<small>บันทึกรายการใหม่</small></span></button>
+          <button data-go="stockout"><i class="ph-bold ph-box-arrow-up-right"></i><span>จ่ายออก<small>ตัดจ่ายจากคลัง</small></span></button>
+          <button id="printHistory"><i class="ph-bold ph-printer"></i><span>พิมพ์ย้อนหลัง<small>ลาเบลและ QR Code</small></span></button>
+          <button data-go="reports"><i class="ph-bold ph-chart-bar"></i><span>รายงานสรุป<small>ข้อมูลเพื่อการบริหาร</small></span></button>
         </section>
         <section class="status-grid" id="statusCards"></section>
         <section class="panel inventory-panel">
-          <div class="panel-heading"><div><h2>รายการคงคลัง</h2><p id="itemCount" class="muted"></p></div><div class="panel-tools"><button id="refreshBtn" class="icon-button" title="รีเฟรช">↻</button><button id="printSelected" class="outline-btn">⌑ พิมพ์ที่เลือก</button></div></div>
+          <div class="panel-heading"><div><h2>รายการคงคลัง</h2><p id="itemCount" class="muted"></p></div><div class="panel-tools"><button id="refreshBtn" class="icon-button" title="รีเฟรช"><i class="ph-bold ph-arrows-clockwise"></i></button><button id="printSelected" class="outline-btn"><i class="ph-bold ph-printer"></i> พิมพ์ที่เลือก</button></div></div>
           <div class="inventory-tabs" role="tablist" aria-label="ประเภทเวชภัณฑ์">
-            <button class="inventory-tab active" data-category="all">▦ <span>ทั้งหมด</span></button>
-            <button class="inventory-tab dialysis" data-category="น้ำยาฟอกไต">◈ <span>น้ำยาฟอกไต</span></button>
-            <button class="inventory-tab disinfect" data-category="น้ำยา Disinfectant">✦ <span>น้ำยา Disinfectant</span></button>
-            <button class="inventory-tab filter" data-category="ตัวกรองเลือด">◉ <span>ตัวกรองเลือด</span></button>
-            <button class="inventory-tab line" data-category="สายส่งเลือด">⌁ <span>สายส่งเลือด</span></button>
-            <button class="inventory-tab needle" data-category="Needle">✣ <span>Needle</span></button>
+            <button class="inventory-tab active" data-category="all"><i class="ph-bold ph-squares-four"></i> <span>ทั้งหมด</span></button>
+            <button class="inventory-tab dialysis" data-category="น้ำยาฟอกไต"><i class="ph-bold ph-drop"></i> <span>น้ำยาฟอกไต</span></button>
+            <button class="inventory-tab disinfect" data-category="น้ำยา Disinfectant"><i class="ph-bold ph-shield-check"></i> <span>น้ำยา Disinfectant</span></button>
+            <button class="inventory-tab filter" data-category="ตัวกรองเลือด"><i class="ph-bold ph-funnel"></i> <span>ตัวกรองเลือด</span></button>
+            <button class="inventory-tab line" data-category="สายส่งเลือด"><i class="ph-bold ph-activity"></i> <span>สายส่งเลือด</span></button>
+            <button class="inventory-tab needle" data-category="Needle"><i class="ph-bold ph-syringe"></i> <span>Needle</span></button>
           </div>
           <div class="filters"><label class="search"><span>⌕</span><input id="searchInput" placeholder="ค้นหา ItemCode หรือชื่อรายการ" /></label><select id="statusFilter"><option value="all">ทุกสถานะ</option><option value="normal">คงคลังปกติ</option><option value="today">หมดอายุวันนี้</option><option value="6months">ใกล้หมดอายุ 6 เดือน</option><option value="3months">ใกล้หมดอายุ 3 เดือน</option><option value="1month">ใกล้หมดอายุ 1 เดือน</option><option value="expired">หมดอายุแล้ว</option></select><input id="dateFilter" type="date" title="วันหมดอายุไม่เกิน" /></div>
           <div class="table-scroll"><table><thead><tr><th><input id="selectAll" type="checkbox" aria-label="เลือกรายการทั้งหมด" /></th><th>ItemCode</th><th>ชื่อรายการ</th><th>ประเภท</th><th>รับเข้า</th><th>หมดอายุ</th><th class="center">คงเหลือ</th><th>สถานะ</th><th>การทำงาน</th></tr></thead><tbody id="inventoryBody"></tbody></table></div>
@@ -57,11 +58,11 @@
       </section>
 
       <section id="stockin" class="page"><div class="page-title"><button class="back-btn" data-go="dashboard">←</button><div><p class="eyebrow">STOCK IN</p><h1>บันทึกรับเข้าเวชภัณฑ์</h1></div></div><form id="stockInForm" class="form-card"><div class="form-grid"><label>ชื่อรายการ <select id="inItem" required></select></label><label>รหัส ItemCode <input id="inCode" readonly placeholder="สร้างอัตโนมัติ" /></label><label>ประเภท <input id="inCategory" readonly /></label><label>วันที่รับเข้า <input id="inDate" type="date" required /></label><label>วันหมดอายุ <input id="inExpiry" type="date" required /></label><label>จำนวนรับเข้า <input id="inQty" type="number" min="1" required /></label><label>หน่วยนับ <input id="inUnit" readonly /></label><label>หมายเหตุ <input id="inNote" /></label></div><div class="form-actions"><button type="button" class="outline-btn" data-go="dashboard">ยกเลิก</button><button class="primary-btn">บันทึกและสร้างสติ๊กเกอร์</button></div></form></section>
-      <section id="stockout" class="page"><div class="page-title"><button class="back-btn" data-go="dashboard">←</button><div><p class="eyebrow">STOCK OUT</p><h1>ตัดจ่ายเวชภัณฑ์</h1></div></div><form id="stockOutForm" class="form-card"><div class="scan-row"><label>ItemCode / สแกน QR Code <input id="outCode" required placeholder="เช่น HEM-0001" /></label><button type="button" id="scanBtn" class="outline-btn">▣ เปิดกล้องสแกน</button></div><div class="form-grid"><label>ชื่อรายการ <input id="outName" readonly /></label><label>คงเหลือ <input id="outBalance" readonly /></label><label>วันที่ใช้งาน <input id="outDate" type="date" required /></label><label>จำนวนจ่าย <input id="outQty" type="number" min="1" required /></label><label>ประเภทการตัดจ่าย <select id="outType"><option>ใช้งานในหน่วยงาน</option><option>หมุนเวียนใช้ตึกอื่น</option><option>หมดอายุ</option></select></label><label>หมายเหตุ <input id="outNote" /></label></div><div class="form-actions"><button type="button" class="outline-btn" data-go="dashboard">ยกเลิก</button><button class="primary-btn">บันทึกการจ่ายออก</button></div></form></section>
-      <section id="reports" class="page"><div class="page-title"><button class="back-btn" data-go="dashboard">←</button><div><p class="eyebrow">ANALYTICS</p><h1>รายงานสรุปคลัง</h1></div></div><div id="reportCards" class="report-grid"></div><section class="panel report-panel"><h2>สรุปเพื่อการบริหาร</h2><div id="reportSummary" class="summary-list"></div><button id="printReport" class="primary-btn">⌑ พิมพ์รายงาน</button></section></section>
+      <section id="stockout" class="page"><div class="page-title"><button class="back-btn" data-go="dashboard">←</button><div><p class="eyebrow">STOCK OUT</p><h1>ตัดจ่ายเวชภัณฑ์</h1></div></div><form id="stockOutForm" class="form-card"><div class="scan-row"><label>ItemCode / สแกน QR Code <input id="outCode" required placeholder="เช่น HEM-0001" /></label><button type="button" id="scanBtn" class="outline-btn"><i class="ph-bold ph-qr-code"></i> เปิดกล้องสแกน</button></div><div class="form-grid"><label>ชื่อรายการ <input id="outName" readonly /></label><label>คงเหลือ <input id="outBalance" readonly /></label><label>วันที่ใช้งาน <input id="outDate" type="date" required /></label><label>จำนวนจ่าย <input id="outQty" type="number" min="1" required /></label><label>ประเภทการตัดจ่าย <select id="outType"><option>ใช้งานในหน่วยงาน</option><option>หมุนเวียนใช้ตึกอื่น</option><option>หมดอายุ</option></select></label><label>หมายเหตุ <input id="outNote" /></label></div><div class="form-actions"><button type="button" class="outline-btn" data-go="dashboard">ยกเลิก</button><button class="primary-btn">บันทึกการจ่ายออก</button></div></form></section>
+      <section id="reports" class="page"><div class="page-title"><button class="back-btn" data-go="dashboard">←</button><div><p class="eyebrow">ANALYTICS</p><h1>รายงานสรุปคลัง</h1></div></div><div id="reportCards" class="report-grid"></div><section class="panel report-panel"><h2>สรุปเพื่อการบริหาร</h2><div id="reportSummary" class="summary-list"></div><button id="printReport" class="primary-btn"><i class="ph-bold ph-printer"></i> พิมพ์รายงาน</button></section></section>
     </main>
   </div>
-  <dialog id="labelDialog"><button class="dialog-close" onclick="this.parentElement.close()">×</button><div id="labels" class="labels"></div><button class="primary-btn print-action" onclick="window.print()">⌑ พิมพ์สติ๊กเกอร์</button></dialog>
+  <dialog id="labelDialog"><button class="dialog-close" onclick="this.parentElement.close()">×</button><div id="labels" class="labels"></div><button class="primary-btn print-action" onclick="window.print()"><i class="ph-bold ph-printer"></i> พิมพ์สติ๊กเกอร์</button></dialog>
   <div id="toast" role="status"></div>
   <script src="app.js"></script>
 </body>
