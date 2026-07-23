@@ -3,12 +3,12 @@ const categories=['น้ำยาฟอกไต','น้ำยา Disinfectant
 const categoryCode={'น้ำยาฟอกไต':'Dialysis','น้ำยา Disinfectant':'Disinfect','ตัวกรองเลือด':'Filter','สายส่งเลือด':'Line','Needle':'Needle'};
 let catalog=[],items=[],page=1,activeCategory='all',selected=new Set(),deferredPrompt,selectedCatalogItem=null,html5Qr=null,currentLabelList=[];
 
-const LABEL_PRINT_CSS=`@page label-2-1{size:50.8mm 25.4mm;margin:0}@page label-101-101{size:101.6mm 101.6mm;margin:0}
+const LABEL_PRINT_CSS=`@page label-2-1{size:50.8mm 25.4mm;margin:0}@page label-90-70{size:90mm 70mm;margin:0}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{font-family:Kanit,Arial,sans-serif}
 .labels{display:flex;flex-wrap:wrap}
 .labels.size-2x1{page:label-2-1}
-.labels.size-101x101{page:label-101-101}
+.labels.size-90x70{page:label-90-70}
 .label-cell{break-after:page;page-break-after:always}
 
 .labels.size-2x1 .label-cell,.labels.size-2x1 .label-card{width:50.8mm;height:25.4mm}
@@ -21,15 +21,15 @@ body{font-family:Kanit,Arial,sans-serif}
 .labels.size-2x1 .label-meta.exp{font-weight:700}
 .labels.size-2x1 .label-warn{font-size:5.5px;font-weight:700;color:#000;border:1px solid #000;background:#fff;padding:.3mm .8mm;border-radius:2px;line-height:1.1;width:fit-content;margin-top:.4mm}
 
-.labels.size-101x101 .label-cell,.labels.size-101x101 .label-card{width:101.6mm;height:101.6mm}
-.labels.size-101x101 .label-card{background:#fff;border:1.5px solid #000;display:grid;grid-template-columns:1fr 38mm;gap:3mm;padding:10mm 4mm 4mm 4mm;color:#000}
-.labels.size-101x101 .label-qr{width:38mm;height:38mm;align-self:center;display:flex;align-items:center;justify-content:center;background:#fff}
-.labels.size-101x101 .label-info{gap:1.5mm;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
-.labels.size-101x101 .label-code{font-size:16px;font-weight:700;color:#000}
-.labels.size-101x101 .label-name{font-size:14px;font-weight:600;line-height:1.25;color:#000;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.labels.size-101x101 .label-meta{font-size:11px;color:#000;line-height:1.3}
-.labels.size-101x101 .label-meta.exp{font-weight:700}
-.labels.size-101x101 .label-warn{font-size:9.5px;font-weight:700;color:#000;border:1.5px solid #000;background:#fff;padding:1mm 2.5mm;border-radius:4px;line-height:1.2;width:fit-content;margin-top:2mm}
+.labels.size-90x70 .label-cell,.labels.size-90x70 .label-card{width:90mm;height:70mm}
+.labels.size-90x70 .label-card{background:#fff;border:1.5px solid #000;display:grid;grid-template-columns:1fr 28mm;gap:2.5mm;padding:3mm;color:#000}
+.labels.size-90x70 .label-qr{width:28mm;height:28mm;align-self:center;display:flex;align-items:center;justify-content:center;background:#fff}
+.labels.size-90x70 .label-info{gap:1mm;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.labels.size-90x70 .label-code{font-size:14px;font-weight:700;color:#000}
+.labels.size-90x70 .label-name{font-size:12px;font-weight:600;line-height:1.2;color:#000;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.labels.size-90x70 .label-meta{font-size:9.5px;color:#000;line-height:1.25}
+.labels.size-90x70 .label-meta.exp{font-weight:700}
+.labels.size-90x70 .label-warn{font-size:8px;font-weight:700;color:#000;border:1.5px solid #000;background:#fff;padding:.8mm 2mm;border-radius:3px;line-height:1.2;width:fit-content;margin-top:1.5mm}
 
 .label-qr img,.label-qr canvas{width:100%;height:100%;object-fit:contain;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;image-rendering:pixelated}`;
 
