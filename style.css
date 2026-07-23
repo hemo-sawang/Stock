@@ -38,78 +38,244 @@
 .pagination{min-height:54px;display:flex;align-items:center;justify-content:space-between;padding-top:18px;color:var(--muted);font-size:12px}.pagination>div{display:flex;align-items:center;gap:10px}.page-title{justify-content:flex-start}.back-btn{width:35px;height:35px;border:0;border-radius:8px;background:#e6f5f7;color:var(--primary);font-size:18px;cursor:pointer}.form-card{max-width:950px;padding:26px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.form-grid label,.scan-row label{display:grid;gap:6px;color:#526971;font-size:13px}.form-actions{justify-content:flex-end;gap:10px;margin-top:25px}.scan-row{gap:10px;max-width:590px;margin-bottom:19px}.scan-row label{flex:1}.report-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:24px}.report-card{padding:19px;border-radius:13px;box-shadow:0 10px 20px #1c547b24;color:#fff}.report-card b{display:block;font-size:28px}.report-card span{font-size:13px;opacity:.9}.report-panel{max-width:800px;padding:24px}.summary-list{margin:17px 0}.summary-list div{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}dialog{width:calc(100% - 32px);max-width:720px;padding:28px;border:0;border-radius:15px;box-shadow:0 12px 50px #17333c40}dialog::backdrop{background:#102d344d}.dialog-close{float:right;width:30px;height:30px;border:0;border-radius:50%;background:#f1f5f6;font-size:20px;cursor:pointer}
 .labels{clear:both;display:flex;flex-wrap:wrap;gap:16px;padding-top:15px}
 
-/* Both sizes are laid out at their TRUE physical mm size at all times (screen and print).
-   The old approach rendered the card at 1x then used transform:scale(2) to make the on-screen
-   preview bigger — that transform layer is what many browsers/print services (especially
-   Android WebView "print" and PDF export) rasterize at low resolution before scaling back up,
-   which is what produced the blurry, jagged printouts. Sizing the card at its real mm dimensions
-   means the browser always lays out and paints it natively — print is pixel/vector accurate.
-   `zoom` (screen-only, ignored in @media print) is used instead to make the on-screen preview
-   easier to read without affecting what actually gets printed. */
-
-/* Size 55 x 22 mm — 1cm blank margin reserved at the top of the label */
-.labels.size-55x22 .label-cell{width:55mm;height:22mm;overflow:hidden;border-radius:6px;box-shadow:0 2px 8px #17333c22;background:#fff}
-.labels.size-55x22 .label-card{width:55mm;height:22mm;box-sizing:border-box;display:grid;grid-template-columns:1fr 11mm;gap:1.5mm;padding:10mm 1.5mm 1mm 1.8mm;background:#fff;border:1px dashed #3e6973}
-.labels.size-55x22 .label-qr{width:11mm;height:11mm;align-self:end;display:flex;align-items:center;justify-content:center;background:#fff}
-.labels.size-55x22 .label-info{gap:.35mm}
-.labels.size-55x22 .label-code{font-size:8.5px}
-.labels.size-55x22 .label-name{font-size:7.5px;-webkit-line-clamp:1}
-.labels.size-55x22 .label-meta{font-size:6.2px}
-.labels.size-55x22 .label-warn{display:none}
-
-/* Size 2 x 1 inch (50.8 x 25.4mm) — full bleed, no reserved margin */
-.labels.size-2x1 .label-cell{width:50.8mm;height:25.4mm;overflow:hidden;border-radius:6px;box-shadow:0 2px 8px #17333c22;background:#fff}
-.labels.size-2x1 .label-card{width:50.8mm;height:25.4mm;box-sizing:border-box;display:grid;grid-template-columns:1fr 20mm;gap:1.8mm;padding:1.8mm;background:#fff;border:1px dashed #3e6973}
-.labels.size-2x1 .label-qr{width:20mm;height:20mm;display:flex;align-items:center;justify-content:center;background:#fff}
-.labels.size-2x1 .label-info{gap:.7mm}
-.labels.size-2x1 .label-code{font-size:10px}
-.labels.size-2x1 .label-name{font-size:8.5px}
-.labels.size-2x1 .label-meta{font-size:7px}
-.labels.size-2x1 .label-warn{font-size:6px}
-
-@media screen{
-.labels.size-55x22 .label-cell{zoom:2.4}
-.labels.size-2x1 .label-cell{zoom:2.4}
+/* Auto-suggest dropdown styles */
+.suggest-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #c9e2e7;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(23, 51, 60, 0.15);
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 100;
+  padding: 4px 0;
+}
+.suggest-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f6f8;
+  transition: background 0.15s ease;
+}
+.suggest-item:last-child {
+  border-bottom: none;
+}
+.suggest-item:hover, .suggest-item.active {
+  background: #eef8fa;
+}
+.suggest-item .item-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: #17333c;
+}
+.suggest-item .item-sub {
+  font-size: 11px;
+  color: #698088;
+}
+.suggest-item .item-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #007e9c;
+  background: #e5f5f8;
+  padding: 2px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
 }
 
-.label-info{display:flex;flex-direction:column;justify-content:center;overflow:hidden}
-.label-code{margin:0;font-weight:700;color:#007e9c;letter-spacing:.2px}
-.label-name{margin:0;font-weight:600;line-height:1.15;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.label-meta{margin:0;color:#3c565d;line-height:1.2}
-.label-meta.exp{font-weight:700;color:#c92a2a}
-.label-warn{margin:.6mm 0 0;font-size:5.2px;font-weight:700;color:#fff;background:#e0481d;padding:.5mm 1mm;border-radius:2px;line-height:1.2;width:fit-content}
-.label-qr img,.label-qr canvas{width:100%;height:100%;object-fit:contain;image-rendering:auto}
-#reader{width:100%;border-radius:10px;overflow:hidden}
-.scan-dialog{max-width:420px}
-.scan-dialog h2{margin-bottom:14px}
-.scan-dialog .muted.center{text-align:center;margin-top:12px}
-.print-action{float:right;margin-top:18px}
-#toast{position:fixed;bottom:25px;left:50%;z-index:10;padding:10px 18px;border-radius:9px;background:#17333c;color:#fff;transform:translateX(-50%) translateY(80px);transition:.25s}#toast.show{transform:translateX(-50%) translateY(0)}
+/* Sticker Layouts for Screen Preview and Print */
+/* Size 2 x 1 inch (50.8 x 25.4mm) — Thermal Printer Optimized */
+.labels.size-2x1 .label-cell {
+  width: 50.8mm;
+  height: 25.4mm;
+  overflow: hidden;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px #17333c22;
+  background: #fff;
+}
+.labels.size-2x1 .label-card {
+  width: 50.8mm;
+  height: 25.4mm;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr 19mm;
+  gap: 1.5mm;
+  padding: 1.5mm 1.8mm 1.2mm 1.8mm;
+  background: #fff;
+  border: 1px solid #000;
+  color: #000;
+  font-family: Kanit, Arial, sans-serif;
+}
+.labels.size-2x1 .label-qr {
+  width: 19mm;
+  height: 19mm;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+.labels.size-2x1 .label-info {
+  gap: 0.3mm;
+}
+.labels.size-2x1 .label-code {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.1;
+}
+.labels.size-2x1 .label-name {
+  font-size: 8.5px;
+  font-weight: 600;
+  line-height: 1.15;
+  color: #000;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.labels.size-2x1 .label-meta {
+  font-size: 6.8px;
+  color: #000;
+  line-height: 1.2;
+}
+.labels.size-2x1 .label-meta.exp {
+  font-weight: 700;
+}
+.labels.size-2x1 .label-warn {
+  font-size: 5.5px;
+  font-weight: 700;
+  color: #000;
+  border: 1px solid #000;
+  background: #fff;
+  padding: 0.3mm 0.8mm;
+  border-radius: 2px;
+  line-height: 1.1;
+  width: fit-content;
+  margin-top: 0.4mm;
+}
+
+/* Size 101.6 x 101.6 mm (4x4 inches) — 1cm top margin reserved */
+.labels.size-101x101 .label-cell {
+  width: 101.6mm;
+  height: 101.6mm;
+  overflow: hidden;
+  border-radius: 6px;
+  box-shadow: 0 3px 12px #17333c22;
+  background: #fff;
+}
+.labels.size-101x101 .label-card {
+  width: 101.6mm;
+  height: 101.6mm;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr 38mm;
+  gap: 3mm;
+  padding: 10mm 4mm 4mm 4mm; /* Top padding 10mm = 1 cm top margin! */
+  background: #fff;
+  border: 1.5px solid #000;
+  color: #000;
+  font-family: Kanit, Arial, sans-serif;
+}
+.labels.size-101x101 .label-qr {
+  width: 38mm;
+  height: 38mm;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+.labels.size-101x101 .label-info {
+  gap: 1.5mm;
+}
+.labels.size-101x101 .label-code {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000;
+}
+.labels.size-101x101 .label-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #000;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.labels.size-101x101 .label-meta {
+  font-size: 11px;
+  color: #000;
+  line-height: 1.3;
+}
+.labels.size-101x101 .label-meta.exp {
+  font-weight: 700;
+}
+.labels.size-101x101 .label-warn {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #000;
+  border: 1.5px solid #000;
+  background: #fff;
+  padding: 1mm 2.5mm;
+  border-radius: 4px;
+  line-height: 1.2;
+  width: fit-content;
+  margin-top: 2mm;
+}
+
+@media screen {
+  .labels.size-2x1 .label-cell { zoom: 2.4; }
+  .labels.size-101x101 .label-cell { zoom: 1.2; }
+}
+
+.label-info { display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+.label-qr img, .label-qr canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+#reader { width: 100%; border-radius: 10px; overflow: hidden; }
+.scan-dialog { max-width: 420px; }
+.scan-dialog h2 { margin-bottom: 14px; }
+.scan-dialog .muted.center { text-align: center; margin-top: 12px; }
+.print-action { float: right; margin-top: 18px; }
+#toast { position: fixed; bottom: 25px; left: 50%; z-index: 10; padding: 10px 18px; border-radius: 9px; background: #17333c; color: #fff; transform: translateX(-50%) translateY(80px); transition: .25s; }
+#toast.show { transform: translateX(-50%) translateY(0); }
 
 /* Loading Overlay styles */
-.loading-overlay {position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(16,45,52,0.4);backdrop-filter:blur(4px);z-index:9999;display:flex;justify-content:center;align-items:center}
-.loading-overlay[hidden] {display:none!important}
-.loading-box {background:#fff;padding:25px 35px;border-radius:14px;box-shadow:0 12px 50px rgba(23,51,60,0.25);display:flex;flex-direction:column;align-items:center;gap:15px}
-.spinner {width:40px;height:40px;border:4px solid var(--line);border-top:4px solid var(--primary);border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin {0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(16,45,52,0.4); backdrop-filter: blur(4px); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+.loading-overlay[hidden] { display: none!important; }
+.loading-box { background: #fff; padding: 25px 35px; border-radius: 14px; box-shadow: 0 12px 50px rgba(23,51,60,0.25); display: flex; flex-direction: column; align-items: center; gap: 15px; }
+.spinner { width: 40px; height: 40px; border: 4px solid var(--line); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 @media(max-width:1050px){.topbar{grid-template-columns:1fr auto;gap:10px}.main-nav{grid-column:1/-1;grid-row:2;height:42px}.install-btn{grid-column:2;grid-row:1}.quick-actions{grid-template-columns:repeat(2,1fr)}.status-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:700px){.topbar{display:flex;flex-wrap:wrap;min-height:64px;padding:12px 16px}.brand{flex:1}.brand small{display:none}.install-btn{padding:7px 10px;font-size:12px}.main-nav{order:3;display:flex;width:100%;height:38px;justify-content:space-between;overflow-x:auto}.nav-link{padding:0 8px;white-space:nowrap}.app-shell main{padding:22px 14px 38px}.hero-row{align-items:flex-start;margin-bottom:18px}.hero-row h1{font-size:22px}.date-chip{display:none}.quick-actions{gap:10px}.quick-actions button{min-height:64px;padding:11px}.quick-actions small{display:none}.status-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.status-card{padding:12px}.inventory-panel{padding:14px}.panel-heading{flex-direction:column;align-items:flex-start}.panel-tools{width:100%;justify-content:space-between}.inventory-tabs{padding-top:12px}.inventory-tab{padding:8px 10px}.filters{grid-template-columns:1fr;gap:8px;margin:12px 0}.pagination{flex-direction:column;align-items:flex-start;gap:10px}.table-scroll{border-radius:8px}.form-card{padding:18px}.form-grid,.report-grid{grid-template-columns:1fr}.scan-row{align-items:end}}
 
-@page label-55-22{size:55mm 22mm;margin:0}
-@page label-2-1{size:50.8mm 25.4mm;margin:0}
+@page label-2-1 { size: 50.8mm 25.4mm; margin: 0; }
+@page label-101-101 { size: 101.6mm 101.6mm; margin: 0; }
 
-@media print{
-*{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.topbar,.page:not(#dashboard),.hero-row,.quick-actions,.status-grid,.inventory-panel,.dialog-close,.print-action,#scanDialog,.print-size-selector,h2{display:none!important}
-dialog{position:static!important;display:block!important;width:100%!important;box-shadow:none!important;padding:0!important;background:transparent!important}
-.labels{gap:0}
-.labels.size-55x22 {page:label-55-22}
-.labels.size-2x1 {page:label-2-1}
+@media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .topbar, .page:not(#dashboard), .hero-row, .quick-actions, .status-grid, .inventory-panel, .dialog-close, .print-action, #scanDialog, .print-size-selector, h2 { display: none!important; }
+  dialog { position: static!important; display: block!important; width: 100%!important; box-shadow: none!important; padding: 0!important; background: transparent!important; }
+  .labels { gap: 0; }
+  .labels.size-2x1 { page: label-2-1; }
+  .labels.size-101x101 { page: label-101-101; }
 
-.labels.size-55x22 .label-cell{zoom:1;width:55mm;height:22mm;break-after:page;overflow:visible;box-shadow:none;border-radius:0}
-.labels.size-55x22 .label-card{border-style:solid}
+  .labels.size-2x1 .label-cell { zoom: 1; width: 50.8mm; height: 25.4mm; break-after: page; page-break-after: always; overflow: visible; box-shadow: none; border-radius: 0; }
+  .labels.size-2x1 .label-card { border-style: solid; }
 
-.labels.size-2x1 .label-cell{zoom:1;width:50.8mm;height:25.4mm;break-after:page;overflow:visible;box-shadow:none;border-radius:0}
-.labels.size-2x1 .label-card{border-style:solid}
+  .labels.size-101x101 .label-cell { zoom: 1; width: 101.6mm; height: 101.6mm; break-after: page; page-break-after: always; overflow: visible; box-shadow: none; border-radius: 0; }
+  .labels.size-101x101 .label-card { border-style: solid; }
 }
+
