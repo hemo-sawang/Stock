@@ -2,40 +2,50 @@ const GAS_URL='https://script.google.com/macros/s/AKfycbyRP34iPvmw742WWQDWzf1Rwg
 const categories=['น้ำยาฟอกไต','น้ำยา Disinfectant','ตัวกรองเลือด','สายส่งเลือด','Needle'];
 const categoryCode={'น้ำยาฟอกไต':'Dialysis','น้ำยา Disinfectant':'Disinfect','ตัวกรองเลือด':'Filter','สายส่งเลือด':'Line','Needle':'Needle'};
 let catalog=[],items=[],page=1,activeCategory='all',selected=new Set(),deferredPrompt,selectedCatalogItem=null,html5Qr=null,currentLabelList=[];
-const LABEL_PRINT_CSS=`@page label-55-22{size:55mm 22mm;margin:0}@page label-2-1{size:50.8mm 25.4mm;margin:0}
+
+const LABEL_PRINT_CSS=`@page label-2-1{size:50.8mm 25.4mm;margin:0}@page label-101-101{size:101.6mm 101.6mm;margin:0}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{font-family:Kanit,Arial,sans-serif}
 .labels{display:flex;flex-wrap:wrap}
-.labels.size-55x22{page:label-55-22}
 .labels.size-2x1{page:label-2-1}
-.label-cell{break-after:page}
-.label-card{background:#fff;border:1px solid #3e6973;display:grid;gap:1.5mm}
-.labels.size-55x22 .label-cell,.labels.size-55x22 .label-card{width:55mm;height:22mm}
-.labels.size-55x22 .label-card{grid-template-columns:1fr 11mm;padding:10mm 1.5mm 1mm 1.8mm}
-.labels.size-55x22 .label-qr{width:11mm;height:11mm;align-self:end}
-.labels.size-55x22 .label-info{gap:.35mm}
-.labels.size-55x22 .label-code{font-size:8.5px}
-.labels.size-55x22 .label-name{font-size:7.5px;-webkit-line-clamp:1}
-.labels.size-55x22 .label-meta{font-size:6.2px}
-.labels.size-55x22 .label-warn{display:none}
+.labels.size-101x101{page:label-101-101}
+.label-cell{break-after:page;page-break-after:always}
+
 .labels.size-2x1 .label-cell,.labels.size-2x1 .label-card{width:50.8mm;height:25.4mm}
-.labels.size-2x1 .label-card{grid-template-columns:1fr 20mm;padding:1.8mm}
-.labels.size-2x1 .label-qr{width:20mm;height:20mm}
-.labels.size-2x1 .label-info{gap:.7mm}
-.labels.size-2x1 .label-code{font-size:10px}
-.labels.size-2x1 .label-name{font-size:8.5px}
-.labels.size-2x1 .label-meta{font-size:7px}
-.labels.size-2x1 .label-warn{font-size:6px}
-.label-info{display:flex;flex-direction:column;justify-content:center;overflow:hidden}
-.label-qr{display:flex;align-items:center;justify-content:center;background:#fff}
-.label-qr img{width:100%;height:100%;object-fit:contain}
-.label-code{font-weight:700;color:#007e9c}
-.label-name{font-weight:600;line-height:1.15;color:#17333c;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.label-meta{color:#3c565d;line-height:1.2}
-.label-meta.exp{font-weight:700;color:#c92a2a}
-.label-warn{margin-top:.6mm;font-weight:700;color:#fff;background:#e0481d;padding:.5mm 1mm;border-radius:2px;width:fit-content}`;
-function qrDataUrl(code){const el=document.getElementById('qr-'+code.replace(/[^A-Za-z0-9-]/g,''));if(!el)return'';const canvas=el.querySelector('canvas');if(canvas)return canvas.toDataURL('image/png');const img=el.querySelector('img');return img?img.src:''}
-function labelCellHtml(i){return `<div class="label-cell"><article class="label-card"><div class="label-info"><p class="label-code">${i.code}</p><p class="label-name">${i.name}</p><p class="label-meta">${i.category}</p><p class="label-meta">รับเข้า: ${thDate.format(new Date(i.received))}</p><p class="label-meta exp">หมดอายุ: ${thDate.format(new Date(i.expiry))}</p><p class="label-meta">ผู้รับเข้า: ${i.receivedBy||'-'}</p><p class="label-warn">หยิบใช้กรุณาตัดจ่ายในระบบ</p></div><div class="label-qr"><img src="${qrDataUrl(i.code)}" alt="QR ${i.code}"></div></article></div>`}
+.labels.size-2x1 .label-card{background:#fff;border:1px solid #000;display:grid;grid-template-columns:1fr 19mm;gap:1.5mm;padding:1.5mm 1.8mm 1.2mm 1.8mm;color:#000}
+.labels.size-2x1 .label-qr{width:19mm;height:19mm;align-self:center;display:flex;align-items:center;justify-content:center;background:#fff}
+.labels.size-2x1 .label-info{gap:.3mm;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.labels.size-2x1 .label-code{font-size:9.5px;font-weight:700;color:#000;line-height:1.1}
+.labels.size-2x1 .label-name{font-size:8.5px;font-weight:600;line-height:1.15;color:#000;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.labels.size-2x1 .label-meta{font-size:6.8px;color:#000;line-height:1.2}
+.labels.size-2x1 .label-meta.exp{font-weight:700}
+.labels.size-2x1 .label-warn{font-size:5.5px;font-weight:700;color:#000;border:1px solid #000;background:#fff;padding:.3mm .8mm;border-radius:2px;line-height:1.1;width:fit-content;margin-top:.4mm}
+
+.labels.size-101x101 .label-cell,.labels.size-101x101 .label-card{width:101.6mm;height:101.6mm}
+.labels.size-101x101 .label-card{background:#fff;border:1.5px solid #000;display:grid;grid-template-columns:1fr 38mm;gap:3mm;padding:10mm 4mm 4mm 4mm;color:#000}
+.labels.size-101x101 .label-qr{width:38mm;height:38mm;align-self:center;display:flex;align-items:center;justify-content:center;background:#fff}
+.labels.size-101x101 .label-info{gap:1.5mm;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.labels.size-101x101 .label-code{font-size:16px;font-weight:700;color:#000}
+.labels.size-101x101 .label-name{font-size:14px;font-weight:600;line-height:1.25;color:#000;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.labels.size-101x101 .label-meta{font-size:11px;color:#000;line-height:1.3}
+.labels.size-101x101 .label-meta.exp{font-weight:700}
+.labels.size-101x101 .label-warn{font-size:9.5px;font-weight:700;color:#000;border:1.5px solid #000;background:#fff;padding:1mm 2.5mm;border-radius:4px;line-height:1.2;width:fit-content;margin-top:2mm}
+
+.label-qr img,.label-qr canvas{width:100%;height:100%;object-fit:contain;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;image-rendering:pixelated}`;
+
+function qrDataUrl(code){
+  const el=document.getElementById('qr-'+code.replace(/[^A-Za-z0-9-]/g,''));
+  if(!el)return'';
+  const canvas=el.querySelector('canvas');
+  if(canvas)return canvas.toDataURL('image/png');
+  const img=el.querySelector('img');
+  return img?img.src:'';
+}
+
+function labelCellHtml(i){
+  return `<div class="label-cell"><article class="label-card"><div class="label-info"><p class="label-code">${i.code}</p><p class="label-name">${i.name}</p><p class="label-meta">${i.category}</p><p class="label-meta">รับเข้า: ${thDate.format(new Date(i.received))}</p><p class="label-meta exp">หมดอายุ: ${thDate.format(new Date(i.expiry))}</p><p class="label-meta">ผู้รับเข้า: ${i.receivedBy||'-'}</p><p class="label-warn">หยิบใช้กรุณาตัดจ่ายในระบบ</p></div><div class="label-qr"><img src="${qrDataUrl(i.code)}" alt="QR ${i.code}"></div></article></div>`;
+}
+
 function printLabels(){
   if(!currentLabelList.length)return toast('ไม่พบรายการสำหรับพิมพ์');
   const size=$('#labelSizeSelect').value;
@@ -45,8 +55,9 @@ function printLabels(){
   const run=()=>{frame.contentWindow.focus();frame.contentWindow.print()};
   const imgs=[...doc.images];
   if(!imgs.length)return setTimeout(run,60);
-  Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(res=>{img.onload=img.onerror=res}))).then(()=>setTimeout(run,60))
+  Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(res=>{img.onload=img.onerror=res}))).then(()=>setTimeout(run,60));
 }
+
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],thDate=new Intl.DateTimeFormat('th-TH',{dateStyle:'medium'});
 const demo=[
  {code:'Dialysis-20260720-001',name:'Dialysate Concentrate A',category:'น้ำยาฟอกไต',unit:'แกลลอน',received:'2026-07-20',expiry:'2027-05-20',qty:24,receivedBy:'สมชาย ใจดี'},
@@ -56,6 +67,7 @@ const demo=[
  {code:'Needle-20260721-001',name:'AV Fistula Needle 16G',category:'Needle',unit:'ชิ้น',received:'2026-07-21',expiry:'2027-07-21',qty:80,receivedBy:'สมชาย ใจดี'}
 ];
 const statusInfo={normal:['คงคลังปกติ','#1f9d72','fa-solid fa-circle-check'],today:['หมดอายุวันนี้','#e03131','fa-solid fa-bell'],'6months':['ใกล้หมดอายุ 6 เดือน','#e8a317','fa-solid fa-hourglass-start'],'3months':['ใกล้หมดอายุ 3 เดือน','#ef7a1a','fa-solid fa-hourglass-half'],'1month':['ใกล้หมดอายุ 1 เดือน','#e0481d','fa-solid fa-triangle-exclamation'],expired:['หมดอายุแล้ว','#c92a2a','fa-solid fa-circle-exclamation']};
+
 function today(){return new Date().toISOString().slice(0,10)}
 function monthFrom(d,n){const x=new Date(d);x.setMonth(x.getMonth()+n);return x}
 function status(i){const n=new Date(today()),e=new Date(i.expiry);if(e<n)return'expired';if(i.expiry===today())return'today';if(e<=monthFrom(n,1))return'1month';if(e<=monthFrom(n,3))return'3months';if(e<=monthFrom(n,6))return'6months';return'normal'}
@@ -69,8 +81,19 @@ async function getData(action){const res=await fetch(`${GAS_URL}?action=${action
 async function loadInventory(showToast=false){showLoading('กำลังโหลดข้อมูลคลัง...');try{const d=await getData('inventory');if(d.ok&&Array.isArray(d.items)){items=d.items.map(i=>({...i,category:normalCategory(i.category)}));render();if(showToast)toast('ดึงข้อมูลล่าสุดจาก Google Sheet แล้ว');hideLoading();return}}catch(err){console.info('Inventory API unavailable',err)}if(!items.length){items=demo;render()}hideLoading();if(showToast)toast('ไม่สามารถเชื่อม Google Sheet — แสดงข้อมูลตัวอย่าง')}
 async function loadCatalog(){showLoading('กำลังโหลดข้อมูลสารบบ...');try{const d=await getData('catalog');if(d.ok&&d.items?.length){catalog=d.items.map(x=>({...x,category:normalCategory(x.category)}));populateCatalog();updateItemList();hideLoading();return}}catch(e){console.info('Catalog API unavailable',e)}catalog=demo.map(i=>({name:i.name,category:i.category,unit:i.unit,note:''}));populateCatalog();updateItemList();hideLoading()}
 async function gas(action,data){try{await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action,...data})});return true}catch(e){return false}}
+
 function renderCards(){const c=Object.fromEntries(Object.keys(statusInfo).map(k=>[k,items.filter(i=>status(i)===k).length]));$('#statusCards').innerHTML=Object.entries(statusInfo).map(([k,[t,color,icon]])=>`<button class="status-card ${$('#statusFilter').value===k?'selected':''}" style="--color:${color}" data-status="${k}"><span class="status-icon"><i class="${icon}"></i></span><b>${c[k]}</b><span>${t}</span></button>`).join('');$$('.status-card').forEach(b=>b.onclick=()=>{$('#statusFilter').value=b.dataset.status;page=1;render();$('.inventory-panel').scrollIntoView({behavior:'smooth'})})}
-function filtered(){const q=$('#searchInput').value.trim().toLowerCase(),s=$('#statusFilter').value,d=$('#dateFilter').value;return items.filter(i=>(activeCategory==='all'||i.category===activeCategory)&&(!q||i.code.toLowerCase().includes(q)||i.name.toLowerCase().includes(q))&&(s==='all'||status(i)===s)&&(!d||i.expiry<=d))}
+
+function filtered(){
+  const q=$('#searchInput').value.trim().toLowerCase(),s=$('#statusFilter').value,d=$('#dateFilter').value;
+  return items.filter(i=>
+    (activeCategory==='all'||i.category===activeCategory)&&
+    (!q||i.code.toLowerCase().includes(q)||i.name.toLowerCase().includes(q)||i.category.toLowerCase().includes(q))&&
+    (s==='all'||status(i)===s)&&
+    (!d||i.expiry<=d)
+  );
+}
+
 function badge(i){const s=status(i),t=statusInfo[s][0],style=s==='normal'?'normal':s==='expired'?'critical':'warning';return`<span class="badge ${style}">${t}</span>`}
 function renderTable(){const data=filtered(),per=8,max=Math.max(1,Math.ceil(data.length/per));page=Math.min(page,max);const list=data.slice((page-1)*per,page*per);$('#inventoryBody').innerHTML=list.length?list.map(i=>`<tr><td><input class="row-check" data-code="${i.code}" type="checkbox" ${selected.has(i.code)?'checked':''}></td><td class="code">${i.code}</td><td>${i.name}</td><td>${i.category}</td><td>${thDate.format(new Date(i.received))}</td><td>${thDate.format(new Date(i.expiry))}</td><td class="center qty">${i.qty} ${i.unit}</td><td>${badge(i)}</td><td><button class="table-action out-one" data-code="${i.code}"><i class="fa-solid fa-arrow-up-right-from-square"></i> ตัดจ่าย</button><button class="table-action print-one" data-code="${i.code}"><i class="fa-solid fa-print"></i> พิมพ์</button><button class="table-action edit-one" data-code="${i.code}"><i class="fa-solid fa-pen-to-square"></i> แก้ไข</button><button class="table-action delete-one" data-code="${i.code}"><i class="fa-solid fa-trash"></i> ลบ</button></td></tr>`).join(''):`<tr><td colspan="9" class="center muted">ไม่พบรายการในหมวดนี้</td></tr>`;$('#itemCount').textContent=`${activeCategory==='all'?'ทุกประเภท':activeCategory} · ${data.length} รายการ`;$('#paginationInfo').textContent=`แสดง ${data.length?(page-1)*per+1:0}–${Math.min(page*per,data.length)} จาก ${data.length}`;$('#pageNo').textContent=`หน้า ${page}/${max}`;$('#prevPage').disabled=page===1;$('#nextPage').disabled=page===max;$('#selectAll').checked=list.length>0&&list.every(i=>selected.has(i.code));$$('.row-check').forEach(e=>e.onchange=()=>{e.checked?selected.add(e.dataset.code):selected.delete(e.dataset.code)});$$('.print-one').forEach(e=>e.onclick=()=>showLabels([e.dataset.code]));$$('.out-one').forEach(e=>e.onclick=()=>openOut(e.dataset.code));$$('.edit-one').forEach(e=>e.onclick=()=>openEdit(e.dataset.code));$$('.delete-one').forEach(e=>e.onclick=()=>deleteOne(e.dataset.code))}
 function renderReports(){const risk=items.filter(i=>status(i)!=='normal'),expired=items.filter(i=>status(i)==='expired');$('#reportCards').innerHTML=[['รายการทั้งหมด',items.length,'#008cab'],['จำนวนคงเหลือ',items.reduce((a,i)=>a+Number(i.qty),0),'#3979d9'],['ต้องเฝ้าระวัง',risk.length,'#e6992c'],['หมดอายุแล้ว',expired.length,'#dd5e69']].map(x=>`<div class="report-card" style="background:${x[2]}"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');$('#reportSummary').innerHTML=`<div><span>หมดอายุแล้ว</span><b>${expired.length} รายการ</b></div><div><span>ใกล้หมดอายุภายใน 3 เดือน</span><b>${items.filter(i=>['today','1month','3months'].includes(status(i))).length} รายการ</b></div><div><span>รวมหน่วยคงเหลือ</span><b>${items.reduce((a,i)=>a+Number(i.qty),0)} หน่วย</b></div>`}
@@ -81,8 +104,39 @@ function genItemCode(categoryThai,receivedDate){const prefix=categoryCode[catego
 function setInInfo(){const cat=$('#inCategorySelect').value.trim(),name=$('#inItem').value.trim();selectedCatalogItem=catalog.find(i=>i.category===cat&&i.name===name)||null;$('#inUnit').value=selectedCatalogItem?.unit||'';$('#inCode').value=selectedCatalogItem?genItemCode(cat,$('#inDate').value):''}
 function go(id){$$('.page').forEach(x=>x.classList.toggle('active',x.id===id));$$('.nav-link').forEach(x=>x.classList.toggle('active',x.dataset.page===id));scrollTo(0,0)}
 function toast(t){const x=$('#toast');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),2800)}
-function openOut(code){const i=items.find(x=>x.code===code);if(!i)return toast('ไม่พบ ItemCode');$('#outCode').value=i.code;$('#outName').value=i.name;$('#outBalance').value=`${i.qty} ${i.unit}`;go('stockout')}
-function showLabels(codes){const list=items.filter(i=>codes.includes(i.code));if(!list.length)return toast('กรุณาเลือกรายการสำหรับพิมพ์');currentLabelList=list;const size=$('#labelSizeSelect').value;$('#labels').className='labels size-'+size;$('#labels').innerHTML=list.map(i=>`<div class="label-cell"><article class="label-card"><div class="label-info"><p class="label-code">${i.code}</p><p class="label-name">${i.name}</p><p class="label-meta">${i.category}</p><p class="label-meta">รับเข้า: ${thDate.format(new Date(i.received))}</p><p class="label-meta exp">หมดอายุ: ${thDate.format(new Date(i.expiry))}</p><p class="label-meta">ผู้รับเข้า: ${i.receivedBy||'-'}</p><p class="label-warn">หยิบใช้กรุณาตัดจ่ายในระบบ</p></div><div class="label-qr" id="qr-${i.code.replace(/[^A-Za-z0-9-]/g,'')}"></div></article></div>`).join('');$('#labelDialog').showModal();list.forEach(i=>{const el=document.getElementById('qr-'+i.code.replace(/[^A-Za-z0-9-]/g,''));if(el&&typeof QRCode!=='undefined'){el.innerHTML='';new QRCode(el,{text:i.code,width:600,height:600,correctLevel:QRCode.CorrectLevel.M})}})}
+
+function openOut(codeOrQuery){
+  const q=(codeOrQuery||'').trim();
+  if(!q)return;
+  let i=items.find(x=>x.code===q);
+  if(!i){
+    const qLower=q.toLowerCase();
+    i=items.find(x=>x.code.toLowerCase().includes(qLower)||x.name.toLowerCase().includes(qLower)||x.category.toLowerCase().includes(qLower));
+  }
+  if(!i)return toast('ไม่พบรายการที่ค้นหา');
+  $('#outCode').value=i.code;
+  $('#outName').value=i.name;
+  $('#outBalance').value=`${i.qty} ${i.unit}`;
+  go('stockout');
+}
+
+function showLabels(codes){
+  const list=items.filter(i=>codes.includes(i.code));
+  if(!list.length)return toast('กรุณาเลือกรายการสำหรับพิมพ์');
+  currentLabelList=list;
+  const size=$('#labelSizeSelect').value;
+  $('#labels').className='labels size-'+size;
+  $('#labels').innerHTML=list.map(i=>`<div class="label-cell"><article class="label-card"><div class="label-info"><p class="label-code">${i.code}</p><p class="label-name">${i.name}</p><p class="label-meta">${i.category}</p><p class="label-meta">รับเข้า: ${thDate.format(new Date(i.received))}</p><p class="label-meta exp">หมดอายุ: ${thDate.format(new Date(i.expiry))}</p><p class="label-meta">ผู้รับเข้า: ${i.receivedBy||'-'}</p><p class="label-warn">หยิบใช้กรุณาตัดจ่ายในระบบ</p></div><div class="label-qr" id="qr-${i.code.replace(/[^A-Za-z0-9-]/g,'')}"></div></article></div>`).join('');
+  $('#labelDialog').showModal();
+  list.forEach(i=>{
+    const el=document.getElementById('qr-'+i.code.replace(/[^A-Za-z0-9-]/g,''));
+    if(el&&typeof QRCode!=='undefined'){
+      el.innerHTML='';
+      new QRCode(el,{text:i.code,width:800,height:800,correctLevel:QRCode.CorrectLevel.H});
+    }
+  });
+}
+
 function openEdit(code){const i=items.find(x=>x.code===code);if(!i)return toast('ไม่พบ ItemCode');$('#editCode').value=i.code;$('#editCategorySelect').value=i.category;$('#editName').value=i.name;$('#editDate').value=i.received;$('#editExpiry').value=i.expiry;$('#editQty').value=i.qty;$('#editUnit').value=i.unit;$('#editStaff').value=i.receivedBy||'';$('#editNote').value=i.note||'';$('#editDialog').showModal()}
 async function deleteOne(code){if(confirm(`คุณต้องการลบรายการ ${code} ใช่หรือไม่?`)){const idx=items.findIndex(i=>i.code===code);if(idx!==-1){items.splice(idx,1);render();toast('ลบรายการเรียบร้อยแล้ว กำลังปรับปรุง Google Sheet');showLoading('กำลังลบข้อมูลใน Google Sheet...');await gas('deleteItem',{code});hideLoading()}}}
 function isIos(){return /iphone|ipad|ipod/i.test(navigator.userAgent)}
@@ -90,4 +144,150 @@ function isStandalone(){return window.matchMedia('(display-mode: standalone)').m
 async function openScanner(){if(typeof Html5Qrcode==='undefined')return toast('ไม่พบไลบรารีสแกน QR กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');$('#scanDialog').showModal();try{html5Qr=new Html5Qrcode('reader');const cams=await Html5Qrcode.getCameras();if(!cams||!cams.length)throw new Error('no-camera');const back=cams.find(c=>/back|rear|environment/i.test(c.label))||cams[cams.length-1];await html5Qr.start(back.id,{fps:10,qrbox:{width:220,height:220}},text=>onScanSuccess(text),()=>{})}catch(err){console.info('Camera scan unavailable',err);toast('ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการใช้งานกล้องในเบราว์เซอร์');closeScanner()}}
 async function closeScanner(){if($('#scanDialog').open)$('#scanDialog').close();if(html5Qr){try{await html5Qr.stop();html5Qr.clear()}catch(e){}html5Qr=null}}
 function onScanSuccess(text){const code=text.trim();closeScanner();$('#outCode').value=code;openOut(code)}
-document.addEventListener('DOMContentLoaded',()=>{$('#today').textContent=thDate.format(new Date());$('#inDate').value=$('#outDate').value=today();loadCatalog();loadInventory();$('#labelSizeSelect').onchange=e=>{$('#labels').className='labels size-'+e.target.value};$$('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));$$('.nav-link').forEach(b=>b.onclick=()=>go(b.dataset.page));$$('.inventory-tab').forEach(b=>b.onclick=()=>{activeCategory=b.dataset.category;page=1;$$('.inventory-tab').forEach(x=>x.classList.toggle('active',x===b));renderTable()});$('#inCategorySelect').oninput=updateItemList;$('#inItem').oninput=setInInfo;$('#inDate').oninput=()=>{if(selectedCatalogItem)$('#inCode').value=genItemCode($('#inCategorySelect').value.trim(),$('#inDate').value)};['searchInput','statusFilter','dateFilter'].forEach(id=>$('#'+id).oninput=()=>{page=1;render()});$('#refreshBtn').onclick=()=>loadInventory(true);$('#prevPage').onclick=()=>{page--;renderTable()};$('#nextPage').onclick=()=>{page++;renderTable()};$('#selectAll').onchange=e=>{filtered().slice((page-1)*8,page*8).forEach(i=>e.target.checked?selected.add(i.code):selected.delete(i.code));renderTable()};$('#printSelected').onclick=()=>showLabels([...selected]);$('#printHistory').onclick=()=>showLabels(items.map(i=>i.code));$('#stockInForm').onsubmit=async e=>{e.preventDefault();if(!categories.includes($('#inCategorySelect').value.trim()))return toast('กรุณาเลือกประเภทจากรายการที่แสดง');const c=selectedCatalogItem;if(!c)return toast('กรุณาเลือกรายการจากรายการที่แสดง');const item={code:$('#inCode').value,name:c.name,category:c.category,unit:c.unit,received:$('#inDate').value,expiry:$('#inExpiry').value,qty:+$('#inQty').value,receivedBy:$('#inStaff').value.trim()};items.push(item);render();showLoading('กำลังบันทึกข้อมูลรับเข้า...');await gas('stockIn',{item,note:$('#inNote').value});hideLoading();showLabels([item.code]);toast('บันทึกรับเข้าแล้ว กำลังปรับปรุง Google Sheet');e.target.reset();$('#inDate').value=today();updateItemList()};$('#outCode').onchange=()=>openOut($('#outCode').value.trim());$('#stockOutForm').onsubmit=async e=>{e.preventDefault();const i=items.find(x=>x.code===$('#outCode').value.trim()),q=+$('#outQty').value;if(!i)return toast('ไม่พบ ItemCode');if(q>i.qty)return toast('จำนวนจ่ายมากกว่าคงเหลือ');i.qty-=q;render();showLoading('กำลังบันทึกการจ่ายออก...');await gas('stockOut',{code:i.code,quantity:q,date:$('#outDate').value,type:$('#outType').value,note:$('#outNote').value,staff:$('#outStaff').value.trim()});hideLoading();go('dashboard');toast('บันทึกการจ่ายออกแล้ว');e.target.reset();$('#outDate').value=today()};$('#editForm').onsubmit=async e=>{e.preventDefault();const code=$('#editCode').value,idx=items.findIndex(x=>x.code===code);if(idx===-1)return toast('ไม่พบรายการที่จะแก้ไข');const updated={code,name:$('#editName').value.trim(),category:$('#editCategorySelect').value.trim(),received:$('#editDate').value,expiry:$('#editExpiry').value,qty:+$('#editQty').value,unit:$('#editUnit').value.trim(),receivedBy:$('#editStaff').value.trim(),note:$('#editNote').value.trim()};items[idx]=updated;render();$('#editDialog').close();toast('แก้ไขข้อมูลเรียบร้อยแล้ว กำลังปรับปรุง Google Sheet');showLoading('กำลังบันทึกการแก้ไขข้อมูล...');await gas('editItem',{item:updated});hideLoading()};$('#scanBtn').onclick=openScanner;$('#scanDialog').addEventListener('close',closeScanner);$('#printReport').onclick=()=>print();if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(err=>console.info('SW register failed',err));addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('#installBtn').hidden=false});addEventListener('appinstalled',()=>{deferredPrompt=null;$('#installBtn').hidden=true;toast('ติดตั้งแอปเรียบร้อยแล้ว')});if(isIos()&&!isStandalone())$('#installBtn').hidden=false;$('#installBtn').onclick=async()=>{if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$('#installBtn').hidden=true}else if(isIos()){toast('กด "แชร์" ด้านล่างเบราว์เซอร์ แล้วเลือก "เพิ่มไปยังหน้าจอโฮม" เพื่อติดตั้งแอป')}else{toast('เบราว์เซอร์นี้ยังไม่รองรับการติดตั้งอัตโนมัติ ลองเปิดด้วย Chrome')}}});
+
+function setupAutoSuggest(inputEl, suggestEl, getMatches, onSelect){
+  if(!inputEl||!suggestEl)return;
+  const renderSuggest=()=>{
+    const q=inputEl.value.trim().toLowerCase();
+    if(!q){suggestEl.hidden=true;suggestEl.innerHTML='';return;}
+    const matches=getMatches(q);
+    if(!matches.length){suggestEl.hidden=true;suggestEl.innerHTML='';return;}
+    suggestEl.innerHTML=matches.slice(0,8).map((item,idx)=>`
+      <div class="suggest-item" data-index="${idx}">
+        <div>
+          <div class="item-title">${item.name}</div>
+          <div class="item-sub">${item.code} · ${item.category}</div>
+        </div>
+        <div class="item-badge">${item.qty} ${item.unit}</div>
+      </div>
+    `).join('');
+    suggestEl.hidden=false;
+    [...suggestEl.querySelectorAll('.suggest-item')].forEach((el,idx)=>{
+      el.onmousedown=(e)=>{
+        e.preventDefault();
+        onSelect(matches[idx]);
+        suggestEl.hidden=true;
+      };
+    });
+  };
+  inputEl.addEventListener('input',renderSuggest);
+  inputEl.addEventListener('focus',renderSuggest);
+  inputEl.addEventListener('blur',()=>setTimeout(()=>{suggestEl.hidden=true},200));
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  $('#today').textContent=thDate.format(new Date());
+  $('#inDate').value=$('#outDate').value=today();
+  loadCatalog();
+  loadInventory();
+
+  $('#labelSizeSelect').onchange=e=>{$('#labels').className='labels size-'+e.target.value};
+  $$('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  $$('.nav-link').forEach(b=>b.onclick=()=>go(b.dataset.page));
+  $$('.inventory-tab').forEach(b=>b.onclick=()=>{activeCategory=b.dataset.category;page=1;$$('.inventory-tab').forEach(x=>x.classList.toggle('active',x===b));renderTable()});
+  $('#inCategorySelect').oninput=updateItemList;
+  $('#inItem').oninput=setInInfo;
+  $('#inDate').oninput=()=>{if(selectedCatalogItem)$('#inCode').value=genItemCode($('#inCategorySelect').value.trim(),$('#inDate').value)};
+
+  ['searchInput','statusFilter','dateFilter'].forEach(id=>$('#'+id).oninput=()=>{page=1;render()});
+
+  // Dashboard Search Auto-suggest
+  setupAutoSuggest(
+    $('#searchInput'),
+    $('#searchSuggest'),
+    (q)=>items.filter(i=>i.code.toLowerCase().includes(q)||i.name.toLowerCase().includes(q)||i.category.toLowerCase().includes(q)),
+    (selectedItem)=>{
+      $('#searchInput').value=selectedItem.name;
+      page=1;
+      render();
+    }
+  );
+
+  // Stock Out Auto-suggest
+  setupAutoSuggest(
+    $('#outCode'),
+    $('#outSuggest'),
+    (q)=>items.filter(i=>i.code.toLowerCase().includes(q)||i.name.toLowerCase().includes(q)||i.category.toLowerCase().includes(q)),
+    (selectedItem)=>{
+      openOut(selectedItem.code);
+    }
+  );
+
+  $('#refreshBtn').onclick=()=>loadInventory(true);
+  $('#prevPage').onclick=()=>{page--;renderTable()};
+  $('#nextPage').onclick=()=>{page++;renderTable()};
+  $('#selectAll').onchange=e=>{filtered().slice((page-1)*8,page*8).forEach(i=>e.target.checked?selected.add(i.code):selected.delete(i.code));renderTable()};
+  $('#printSelected').onclick=()=>showLabels([...selected]);
+  $('#printHistory').onclick=()=>showLabels(items.map(i=>i.code));
+
+  $('#stockInForm').onsubmit=async e=>{
+    e.preventDefault();
+    if(!categories.includes($('#inCategorySelect').value.trim()))return toast('กรุณาเลือกประเภทจากรายการที่แสดง');
+    const c=selectedCatalogItem;
+    if(!c)return toast('กรุณาเลือกรายการจากรายการที่แสดง');
+    const item={code:$('#inCode').value,name:c.name,category:c.category,unit:c.unit,received:$('#inDate').value,expiry:$('#inExpiry').value,qty:+$('#inQty').value,receivedBy:$('#inStaff').value.trim()};
+    items.push(item);
+    render();
+    showLoading('กำลังบันทึกข้อมูลรับเข้า...');
+    await gas('stockIn',{item,note:$('#inNote').value});
+    hideLoading();
+    showLabels([item.code]);
+    toast('บันทึกรับเข้าแล้ว กำลังปรับปรุง Google Sheet');
+    e.target.reset();
+    $('#inDate').value=today();
+    updateItemList();
+  };
+
+  $('#outCode').onchange=()=>openOut($('#outCode').value.trim());
+
+  $('#stockOutForm').onsubmit=async e=>{
+    e.preventDefault();
+    const i=items.find(x=>x.code===$('#outCode').value.trim()),q=+$('#outQty').value;
+    if(!i)return toast('ไม่พบ ItemCode');
+    if(q>i.qty)return toast('จำนวนจ่ายมากกว่าคงเหลือ');
+    i.qty-=q;
+    render();
+    showLoading('กำลังบันทึกการจ่ายออก...');
+    await gas('stockOut',{code:i.code,quantity:q,date:$('#outDate').value,type:$('#outType').value,note:$('#outNote').value,staff:$('#outStaff').value.trim()});
+    hideLoading();
+    go('dashboard');
+    toast('บันทึกการจ่ายออกแล้ว');
+    e.target.reset();
+    $('#outDate').value=today();
+  };
+
+  $('#editForm').onsubmit=async e=>{
+    e.preventDefault();
+    const code=$('#editCode').value,idx=items.findIndex(x=>x.code===code);
+    if(idx===-1)return toast('ไม่พบรายการที่จะแก้ไข');
+    const updated={code,name:$('#editName').value.trim(),category:$('#editCategorySelect').value.trim(),received:$('#editDate').value,expiry:$('#editExpiry').value,qty:+$('#editQty').value,unit:$('#editUnit').value.trim(),receivedBy:$('#editStaff').value.trim(),note:$('#editNote').value.trim()};
+    items[idx]=updated;
+    render();
+    $('#editDialog').close();
+    toast('แก้ไขข้อมูลเรียบร้อยแล้ว กำลังปรับปรุง Google Sheet');
+    showLoading('กำลังบันทึกการแก้ไขข้อมูล...');
+    await gas('editItem',{item:updated});
+    hideLoading();
+  };
+
+  $('#scanBtn').onclick=openScanner;
+  $('#scanDialog').addEventListener('close',closeScanner);
+  $('#printReport').onclick=()=>print();
+
+  if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(err=>console.info('SW register failed',err));
+  addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('#installBtn').hidden=false});
+  addEventListener('appinstalled',()=>{deferredPrompt=null;$('#installBtn').hidden=true;toast('ติดตั้งแอปเรียบร้อยแล้ว')});
+  if(isIos()&&!isStandalone())$('#installBtn').hidden=false;
+  $('#installBtn').onclick=async()=>{
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt=null;
+      $('#installBtn').hidden=true;
+    }else if(isIos()){
+      toast('กด "แชร์" ด้านล่างเบราว์เซอร์ แล้วเลือก "เพิ่มไปยังหน้าจอโฮม" เพื่อติดตั้งแอป');
+    }else{
+      toast('เบราว์เซอร์นี้ยังไม่รองรับการติดตั้งอัตโนมัติ ลองเปิดด้วย Chrome');
+    }
+  };
+});
