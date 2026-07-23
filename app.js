@@ -1,7 +1,52 @@
 const GAS_URL='https://script.google.com/macros/s/AKfycbyRP34iPvmw742WWQDWzf1Rwg7Cg9K04HcAkziUJCoygz8VfxbS3Ltx0R_c3fcMuwE/exec';
 const categories=['น้ำยาฟอกไต','น้ำยา Disinfectant','ตัวกรองเลือด','สายส่งเลือด','Needle'];
 const categoryCode={'น้ำยาฟอกไต':'Dialysis','น้ำยา Disinfectant':'Disinfect','ตัวกรองเลือด':'Filter','สายส่งเลือด':'Line','Needle':'Needle'};
-let catalog=[],items=[],page=1,activeCategory='all',selected=new Set(),deferredPrompt,selectedCatalogItem=null,html5Qr=null;
+let catalog=[],items=[],page=1,activeCategory='all',selected=new Set(),deferredPrompt,selectedCatalogItem=null,html5Qr=null,currentLabelList=[];
+const LABEL_PRINT_CSS=`@page label-55-22{size:55mm 22mm;margin:0}@page label-2-1{size:50.8mm 25.4mm;margin:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:Kanit,Arial,sans-serif}
+.labels{display:flex;flex-wrap:wrap}
+.labels.size-55x22{page:label-55-22}
+.labels.size-2x1{page:label-2-1}
+.label-cell{break-after:page}
+.label-card{background:#fff;border:1px solid #3e6973;display:grid;gap:1.5mm}
+.labels.size-55x22 .label-cell,.labels.size-55x22 .label-card{width:55mm;height:22mm}
+.labels.size-55x22 .label-card{grid-template-columns:1fr 11mm;padding:10mm 1.5mm 1mm 1.8mm}
+.labels.size-55x22 .label-qr{width:11mm;height:11mm;align-self:end}
+.labels.size-55x22 .label-info{gap:.35mm}
+.labels.size-55x22 .label-code{font-size:8.5px}
+.labels.size-55x22 .label-name{font-size:7.5px;-webkit-line-clamp:1}
+.labels.size-55x22 .label-meta{font-size:6.2px}
+.labels.size-55x22 .label-warn{display:none}
+.labels.size-2x1 .label-cell,.labels.size-2x1 .label-card{width:50.8mm;height:25.4mm}
+.labels.size-2x1 .label-card{grid-template-columns:1fr 20mm;padding:1.8mm}
+.labels.size-2x1 .label-qr{width:20mm;height:20mm}
+.labels.size-2x1 .label-info{gap:.7mm}
+.labels.size-2x1 .label-code{font-size:10px}
+.labels.size-2x1 .label-name{font-size:8.5px}
+.labels.size-2x1 .label-meta{font-size:7px}
+.labels.size-2x1 .label-warn{font-size:6px}
+.label-info{display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.label-qr{display:flex;align-items:center;justify-content:center;background:#fff}
+.label-qr img{width:100%;height:100%;object-fit:contain}
+.label-code{font-weight:700;color:#007e9c}
+.label-name{font-weight:600;line-height:1.15;color:#17333c;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.label-meta{color:#3c565d;line-height:1.2}
+.label-meta.exp{font-weight:700;color:#c92a2a}
+.label-warn{margin-top:.6mm;font-weight:700;color:#fff;background:#e0481d;padding:.5mm 1mm;border-radius:2px;width:fit-content}`;
+function qrDataUrl(code){const el=document.getElementById('qr-'+code.replace(/[^A-Za-z0-9-]/g,''));if(!el)return'';const canvas=el.querySelector('canvas');if(canvas)return canvas.toDataURL('image/png');const img=el.querySelector('img');return img?img.src:''}
+function labelCellHtml(i){return `<div class="label-cell"><article class="label-card"><div class="label-info"><p class="label-code">${i.code}</p><p class="label-name">${i.name}</p><p class="label-meta">${i.category}</p><p class="label-meta">รับเข้า: ${thDate.format(new Date(i.received))}</p><p class="label-meta exp">หมดอายุ: ${thDate.format(new Date(i.expiry))}</p><p class="label-meta">ผู้รับเข้า: ${i.receivedBy||'-'}</p><p class="label-warn">หยิบใช้กรุณาตัดจ่ายในระบบ</p></div><div class="label-qr"><img src="${qrDataUrl(i.code)}" alt="QR ${i.code}"></div></article></div>`}
+function printLabels(){
+  if(!currentLabelList.length)return toast('ไม่พบรายการสำหรับพิมพ์');
+  const size=$('#labelSizeSelect').value;
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>พิมพ์สติ๊กเกอร์</title><style>${LABEL_PRINT_CSS}</style></head><body><div class="labels size-${size}">${currentLabelList.map(labelCellHtml).join('')}</div></body></html>`;
+  const frame=$('#printFrame'),doc=frame.contentDocument||frame.contentWindow.document;
+  doc.open();doc.write(html);doc.close();
+  const run=()=>{frame.contentWindow.focus();frame.contentWindow.print()};
+  const imgs=[...doc.images];
+  if(!imgs.length)return setTimeout(run,60);
+  Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(res=>{img.onload=img.onerror=res}))).then(()=>setTimeout(run,60))
+}
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],thDate=new Intl.DateTimeFormat('th-TH',{dateStyle:'medium'});
 const demo=[
  {code:'Dialysis-20260720-001',name:'Dialysate Concentrate A',category:'น้ำยาฟอกไต',unit:'แกลลอน',received:'2026-07-20',expiry:'2027-05-20',qty:24,receivedBy:'สมชาย ใจดี'},
@@ -37,7 +82,7 @@ function setInInfo(){const cat=$('#inCategorySelect').value.trim(),name=$('#inIt
 function go(id){$$('.page').forEach(x=>x.classList.toggle('active',x.id===id));$$('.nav-link').forEach(x=>x.classList.toggle('active',x.dataset.page===id));scrollTo(0,0)}
 function toast(t){const x=$('#toast');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),2800)}
 function openOut(code){const i=items.find(x=>x.code===code);if(!i)return toast('ไม่พบ ItemCode');$('#outCode').value=i.code;$('#outName').value=i.name;$('#outBalance').value=`${i.qty} ${i.unit}`;go('stockout')}
-function showLabels(codes){const list=items.filter(i=>codes.includes(i.code));if(!list.length)return toast('กรุณาเลือกรายการสำหรับพิมพ์');const size=$('#labelSizeSelect').value;$('#labels').className='labels size-'+size;$('#labels').innerHTML=list.map(i=>`<div class="label-cell"><article class="label-card"><div class="label-info"><p class="label-code">${i.code}</p><p class="label-name">${i.name}</p><p class="label-meta">${i.category}</p><p class="label-meta">รับเข้า: ${thDate.format(new Date(i.received))}</p><p class="label-meta exp">หมดอายุ: ${thDate.format(new Date(i.expiry))}</p><p class="label-meta">ผู้รับเข้า: ${i.receivedBy||'-'}</p><p class="label-warn">หยิบใช้กรุณาตัดจ่ายในระบบ</p></div><div class="label-qr" id="qr-${i.code.replace(/[^A-Za-z0-9-]/g,'')}"></div></article></div>`).join('');$('#labelDialog').showModal();list.forEach(i=>{const el=document.getElementById('qr-'+i.code.replace(/[^A-Za-z0-9-]/g,''));if(el&&typeof QRCode!=='undefined'){el.innerHTML='';new QRCode(el,{text:i.code,width:600,height:600,correctLevel:QRCode.CorrectLevel.M})}})}
+function showLabels(codes){const list=items.filter(i=>codes.includes(i.code));if(!list.length)return toast('กรุณาเลือกรายการสำหรับพิมพ์');currentLabelList=list;const size=$('#labelSizeSelect').value;$('#labels').className='labels size-'+size;$('#labels').innerHTML=list.map(i=>`<div class="label-cell"><article class="label-card"><div class="label-info"><p class="label-code">${i.code}</p><p class="label-name">${i.name}</p><p class="label-meta">${i.category}</p><p class="label-meta">รับเข้า: ${thDate.format(new Date(i.received))}</p><p class="label-meta exp">หมดอายุ: ${thDate.format(new Date(i.expiry))}</p><p class="label-meta">ผู้รับเข้า: ${i.receivedBy||'-'}</p><p class="label-warn">หยิบใช้กรุณาตัดจ่ายในระบบ</p></div><div class="label-qr" id="qr-${i.code.replace(/[^A-Za-z0-9-]/g,'')}"></div></article></div>`).join('');$('#labelDialog').showModal();list.forEach(i=>{const el=document.getElementById('qr-'+i.code.replace(/[^A-Za-z0-9-]/g,''));if(el&&typeof QRCode!=='undefined'){el.innerHTML='';new QRCode(el,{text:i.code,width:600,height:600,correctLevel:QRCode.CorrectLevel.M})}})}
 function openEdit(code){const i=items.find(x=>x.code===code);if(!i)return toast('ไม่พบ ItemCode');$('#editCode').value=i.code;$('#editCategorySelect').value=i.category;$('#editName').value=i.name;$('#editDate').value=i.received;$('#editExpiry').value=i.expiry;$('#editQty').value=i.qty;$('#editUnit').value=i.unit;$('#editStaff').value=i.receivedBy||'';$('#editNote').value=i.note||'';$('#editDialog').showModal()}
 async function deleteOne(code){if(confirm(`คุณต้องการลบรายการ ${code} ใช่หรือไม่?`)){const idx=items.findIndex(i=>i.code===code);if(idx!==-1){items.splice(idx,1);render();toast('ลบรายการเรียบร้อยแล้ว กำลังปรับปรุง Google Sheet');showLoading('กำลังลบข้อมูลใน Google Sheet...');await gas('deleteItem',{code});hideLoading()}}}
 function isIos(){return /iphone|ipad|ipod/i.test(navigator.userAgent)}
